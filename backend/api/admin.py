@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
     User, Ingredient, Recipe, RecipeIngredient,
-    Follow, Tag
+    Follow,
 )
 
 
@@ -11,13 +11,6 @@ class IngredientAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "measurement_unit")
     search_fields = ("name",)
     list_filter = ("measurement_unit",)
-
-
-@admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
-    list_display = ("name", "color", "slug")
-    search_fields = ("name", "slug")
-    prepopulated_fields = {"slug": ("name",)}
 
 
 class RecipeIngredientInline(admin.TabularInline):
@@ -52,6 +45,5 @@ class RecipeAdmin(admin.ModelAdmin):
         "pub_date",
     )
     search_fields = ("name",)
-    list_filter = ("author", "name", "pub_date", "tags")
+    list_filter = ("author", "name", "pub_date")
     inlines = [RecipeIngredientInline]
-    filter_horizontal = ("tags",)

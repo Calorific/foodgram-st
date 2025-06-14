@@ -11,7 +11,6 @@ from rest_framework.response import Response
 from .models import (
     Ingredient,
     Recipe,
-    Tag,
     RecipeIngredient,
     User,
     Follow,
@@ -19,7 +18,6 @@ from .models import (
 from .serializers import (
     IngredientSerializer,
     RecipeSerializer,
-    TagSerializer,
     ShortRecipeSerializer,
     RecipesUserSerializer,
     AvatarSerializer,
@@ -36,13 +34,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     filterset_class = IngredientFilter
     filter_backends = [DjangoFilterBackend]
-    permission_classes = [permissions.AllowAny]
-    pagination_class = None
-
-
-class TagViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = TagSerializer
-    queryset = Tag.objects.all()
     permission_classes = [permissions.AllowAny]
     pagination_class = None
 
@@ -215,11 +206,10 @@ class CustomUserViewSet(UserViewSet):
                 {"errors": "Нельзя подписываться на свой аккаунт"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        subscription = Follow.objects.filter(user=user, author=author)
-        is_subscribed = subscription.exists()
+        subscription = user.follower.filter(author=author).first()
 
         if request.method == "POST":
-            if is_subscribed:
+            if subscription:
                 return Response(
                     {"errors": "Подписка уже существует"},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -231,7 +221,7 @@ class CustomUserViewSet(UserViewSet):
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if not is_subscribed:
+        if not subscription:
             return Response(
                 {"errors": "Вы еще не были подписаны"},
                 status=status.HTTP_400_BAD_REQUEST,
